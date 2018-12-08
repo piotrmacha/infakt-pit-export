@@ -14,6 +14,7 @@ def money(raw):
     return "%s zł" % '{:17.2f}'.format(raw / 100.00).replace('.', ',')
 
 books = json.loads(urllib.request.urlopen("https://api.infakt.pl/v3/books.json?api_key=" + apiKey).read())
+taxes = json.loads(urllib.request.urlopen("https://api.infakt.pl/v3/income_taxes.json?api_key=" + apiKey).read())
 zus = json.loads(urllib.request.urlopen("https://api.infakt.pl/v3/insurance_fees.json?api_key=" + apiKey).read())
 
 income_sum = 0
@@ -39,6 +40,21 @@ income_price = "{:>20}".format(money(income_sum))
 expenses_price = "{:>20}".format(money(expenses_sum))
 profit_price = "{:>20}".format(money(profit_sum))
 print("%s%s%s%s" % (period_name, income_price, expenses_price, profit_price))
+print('')
+
+tax_sum = 0
+print("Zaliczki %s%s" % ('{:>11}'.format('Okres'), '{:>60}'.format('Zaliczka')))
+print('-' * 80)
+for tax in taxes['entities']:
+    if (year in tax['period_name']):
+        tax_sum += tax['to_pay_price']
+        period_name = "{:>20}".format(tax['period_name'])
+        to_pay = "{:>60}".format(money(tax['to_pay_price']))
+        print("%s%s" % (period_name, to_pay))
+print('-' * 80)
+period_name = "{:>20}".format('SUMA')
+to_pay_price = "{:>60}".format(money(tax_sum))
+print("%s%s" % (period_name, to_pay_price))
 print('')
 
 social_sum = 0
